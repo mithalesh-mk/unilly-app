@@ -1,6 +1,10 @@
 import React from "react";
 
-import { BodyText, SectionCard, ThemedScreen } from "@/components/ThemedScreen";
+import {
+  BodyText,
+  SectionCard,
+  ThemedScreen,
+} from "@/utils/Theme/ThemedScreen";
 import { Pressable, Text } from "react-native";
 import { Link } from "expo-router";
 import { useTheme } from "@/constants/theme";

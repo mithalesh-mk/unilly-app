@@ -4,7 +4,11 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { Link } from "expo-router";
 
-import { BodyText, SectionCard, ThemedScreen } from "@/components/ThemedScreen";
+import {
+  BodyText,
+  SectionCard,
+  ThemedScreen,
+} from "@/utils/Theme/ThemedScreen";
 
 import { radii, spacing, useTheme } from "@/constants/theme";
 
