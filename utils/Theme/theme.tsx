@@ -1,6 +1,8 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
+
+import { themeStorage } from "./themeStorage";
 
 type ThemeContextType = {
   colors: typeof lightColors;
@@ -47,9 +49,36 @@ const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const toggleTheme = () => {
-    setIsDark((prev) => !prev);
+  useEffect(() => {
+    loadTheme();
+  }, []);
+
+  const loadTheme = async () => {
+    try {
+      const savedTheme = await themeStorage.getTheme();
+
+      if (savedTheme === "dark") {
+        setIsDark(true);
+      }
+    } catch (error) {
+      console.log("Failed to load theme", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleTheme = async () => {
+    try {
+      const nextTheme = !isDark;
+
+      setIsDark(nextTheme);
+
+      await themeStorage.setTheme(nextTheme ? "dark" : "light");
+    } catch (error) {
+      console.log("Failed to save theme", error);
+    }
   };
 
   const colors = isDark ? darkColors : lightColors;
@@ -87,6 +116,8 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
     }),
     [isDark],
   );
+
+  if (loading) return null;
 
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

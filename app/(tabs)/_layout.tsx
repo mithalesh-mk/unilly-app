@@ -3,7 +3,7 @@ import { Tabs } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
-import { useTheme } from "@/constants/theme";
+import { useTheme } from "@/utils/Theme/theme";
 import { useAuth } from "@/utils/Auths/AuthContext";
 import { Image } from "expo-image";
 import { View } from "react-native";

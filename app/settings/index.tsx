@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useTheme } from "@/constants/theme";
+import { useTheme } from "@/utils/Theme/theme";
 import { useAuth } from "@/utils/Auths/AuthContext";
 
 // ─────────────────────────────────────────────────────────────

@@ -7,7 +7,7 @@ import {
 } from "@/utils/Theme/ThemedScreen";
 import { Pressable, Text } from "react-native";
 import { Link } from "expo-router";
-import { useTheme } from "@/constants/theme";
+import { useTheme } from "@/utils/Theme/theme";
 
 const Profile = () => {
   const { colors } = useTheme();
