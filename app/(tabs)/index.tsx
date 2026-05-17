@@ -1,6 +1,10 @@
 import React from "react";
 
-import { BodyText, SectionCard, ThemedScreen } from "@/components/ThemedScreen";
+import {
+  BodyText,
+  SectionCard,
+  ThemedScreen,
+} from "@/utils/Theme/ThemedScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Home = () => {
