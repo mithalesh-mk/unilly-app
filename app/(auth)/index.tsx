@@ -11,7 +11,7 @@ import {
 
 import { Link } from "expo-router";
 
-import { useTheme, radii, spacing } from "@/constants/theme";
+import { useTheme, radii, spacing } from "@/utils/Theme/theme";
 import { useAuth } from "@/utils/Auths/AuthContext";
 
 export default function Login() {

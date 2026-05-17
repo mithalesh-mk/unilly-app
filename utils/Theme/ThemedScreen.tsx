@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { radii, spacing, useTheme } from "@/constants/theme";
+import { radii, spacing, useTheme } from "@/utils/Theme/theme";
 
 type ThemedScreenProps = PropsWithChildren<{
   title: string;

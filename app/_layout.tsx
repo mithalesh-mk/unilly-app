@@ -2,7 +2,7 @@ import { ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
-import { AppThemeProvider, useTheme } from "@/constants/theme";
+import { AppThemeProvider, useTheme } from "@/utils/Theme/theme";
 
 import { AuthProvider } from "@/utils/Auths/AuthContext";
 
