@@ -6,7 +6,7 @@ import axios, {
 import { authStorage } from "./Auths/authStorage";
 
 const API_BASE_URL = {
-  development: "http://192.168.1.34:8080",
+  development: "http://10.213.75.188:8080",
   production: "https://uniliy-api.onrender.com/",
 };
 
