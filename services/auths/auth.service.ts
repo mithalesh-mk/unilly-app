@@ -11,7 +11,6 @@ import { isAxiosError } from "axios";
 
 // 🔐 LOGIN
 export const login = async (data: LoginRequest) => {
-  console.log("Sending login request with data:", data);
   const response = await axiosInstance.post<AuthResponse>("/auth/login", data);
   return response.data;
 };
