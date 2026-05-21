@@ -31,6 +31,8 @@ export default function Login() {
       return;
     }
 
+    console.log("URL : ", process.env.EXPO_PUBLIC_DEVELOPMENT_URL);
+
     try {
       setLoading(true);
       setError("");
