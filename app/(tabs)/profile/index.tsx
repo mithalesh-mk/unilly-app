@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { radii, spacing, useTheme } from "@/constants/theme";
+import { radii, spacing, useTheme } from "@/utils/Theme/theme";
 import { getApiError } from "@/services/auths/auth.service";
 import { fetchFeedPosts } from "@/services/posts/post.service";
 import type { PostRecord } from "@/services/posts/post.types";
@@ -141,7 +141,11 @@ export default function Profile() {
             {displayUser?.username || "profile"}
           </Text>
           {profile?.verification_status === "verified" && (
-            <Ionicons name="checkmark-circle" size={17} color={colors.primary} />
+            <Ionicons
+              name="checkmark-circle"
+              size={17}
+              color={colors.primary}
+            />
           )}
         </View>
 
@@ -183,7 +187,11 @@ export default function Profile() {
               { borderColor: colors.error, backgroundColor: colors.card },
             ]}
           >
-            <Ionicons name="alert-circle-outline" size={18} color={colors.error} />
+            <Ionicons
+              name="alert-circle-outline"
+              size={18}
+              color={colors.error}
+            />
             <Text style={[styles.noticeText, { color: colors.error }]}>
               {error}
             </Text>
@@ -239,7 +247,11 @@ export default function Profile() {
                 { borderColor: colors.border, backgroundColor: colors.card },
               ]}
             >
-              <Ionicons name="shield-checkmark-outline" size={13} color={colors.text} />
+              <Ionicons
+                name="shield-checkmark-outline"
+                size={13}
+                color={colors.text}
+              />
               <Text style={[styles.badgeText, { color: colors.text }]}>
                 {formatStatus(profile?.verification_status)}
               </Text>
@@ -248,7 +260,10 @@ export default function Profile() {
         </View>
 
         <View style={styles.actionsRow}>
-          <ProfileButton label="Edit profile" onPress={() => router.push("/settings")} />
+          <ProfileButton
+            label="Edit profile"
+            onPress={() => router.push("/settings")}
+          />
           <ProfileButton label="Share profile" onPress={handleRefresh} />
         </View>
 
@@ -327,7 +342,10 @@ function Stat({ value, label }: { value: string | number; label: string }) {
 
   return (
     <View style={styles.stat}>
-      <Text numberOfLines={1} style={[styles.statValue, { color: colors.text }]}>
+      <Text
+        numberOfLines={1}
+        style={[styles.statValue, { color: colors.text }]}
+      >
         {value}
       </Text>
       <Text style={[styles.statLabel, { color: colors.text }]}>{label}</Text>
