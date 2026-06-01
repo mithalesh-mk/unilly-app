@@ -2,17 +2,14 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   BottomSheetBackdrop,
   BottomSheetFlatList,
-  BottomSheetFooter,
   BottomSheetModal,
   BottomSheetTextInput,
   TouchableOpacity,
   type BottomSheetBackdropProps,
-  type BottomSheetFooterProps,
 } from '@gorhom/bottom-sheet';
 import React, { useMemo, useState } from 'react';
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BackHandler } from 'react-native';
 
 type Comment = {
   id: string;
@@ -50,26 +47,33 @@ export default function CommentPanel({
   const [isMounted, setIsMounted] = useState(visible);
   const [sheetKey, setSheetKey] = useState(0);
   const closingRef = React.useRef(false);
+  const inputRef = React.useRef<any>(null);
 
-  const snapPoints = useMemo(() => ['99%'], []);
-  const disabled = useMemo(
-    () => commentText.trim().length === 0,
-    [commentText],
-  );
+  const snapPoints = useMemo(() => ['100%'], []);
 
-    React.useEffect(() => {
+  React.useEffect(() => {
     if (!isMounted) return;
 
+    const frame = requestAnimationFrame(() => {
+      sheetRef.current?.present();
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    });
     const subscription = BackHandler.addEventListener(
-        'hardwareBackPress',
-        () => {
+      'hardwareBackPress',
+      () => {
         sheetRef.current?.dismiss();
-        return true; 
-        },
+        return true; // true = event consumed, navigator won't go back
+      },
     );
 
-    return () => subscription.remove();
-    }, [isMounted]);
+    return () => {
+      subscription.remove();
+      cancelAnimationFrame(frame);
+    };
+  }, [isMounted, sheetKey]);
 
   React.useEffect(() => {
     if (visible) {
@@ -191,48 +195,6 @@ export default function CommentPanel({
       colors.text,
     ],
   );
-
-  const ListHeaderComponent = React.useMemo(
-    () => (
-      <View
-        style={[
-          styles.header,
-          {
-            borderBottomColor: colors.border,
-            paddingTop: Math.max(insets.top, 10),
-          },
-        ]}
-      >
-        <View>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Comments
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: colors.placeholder }]}>
-            {comments.length} {comments.length === 1 ? 'comment' : 'comments'}
-          </Text>
-        </View>
-
-        <TouchableOpacity
-          activeOpacity={0.75}
-          onPress={() => {
-            sheetRef.current?.dismiss();
-          }}
-          style={[styles.closeButton, { backgroundColor: colors.card }]}
-        >
-          <Ionicons name="close" size={20} color={colors.text} />
-        </TouchableOpacity>
-      </View>
-    ),
-    [
-      colors.border,
-      colors.card,
-      colors.placeholder,
-      colors.text,
-      comments.length,
-      insets.top,
-    ],
-  );
-
   const ListEmptyComponent = React.useMemo(
     () => (
       <View style={styles.emptyContainer}>
@@ -250,6 +212,7 @@ export default function CommentPanel({
     <BottomSheetModal
       key={sheetKey}
       ref={sheetRef}
+      animateOnMount
       keyboardBehavior="interactive"
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: colors.bg }}
@@ -265,14 +228,13 @@ export default function CommentPanel({
       keyboardBlurBehavior="restore"
       onDismiss={handleDismiss}
       snapPoints={snapPoints}
-    //   topInset={insets.top}
+      topInset={insets.top}
     >
       <View style={{ flex: 1 }}>
         <BottomSheetFlatList
           data={comments}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={ListEmptyComponent}
-          ListHeaderComponent={ListHeaderComponent}
           contentContainerStyle={[
             styles.commentList,
             comments.length === 0 && styles.emptyList,
@@ -308,6 +270,7 @@ export default function CommentPanel({
             ]}
           >
             <BottomSheetTextInput
+              ref={inputRef}
               multiline
               value={commentText}
               onChangeText={setCommentText}
