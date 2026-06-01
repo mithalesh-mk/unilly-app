@@ -43,6 +43,59 @@ export type FeedParams = {
   scope: "all" | "following" | "mine";
 };
 
+export interface Author {
+  id: number;
+  username: string;
+  name: string;
+  profile_pic: string;
+}
+
+export interface PostStats {
+  likes_count: number;
+  comments_count: number;
+}
+
+export interface FeedPost {
+  id: number;
+  title: string;
+  body: string;
+  status: string;
+  user_id: number;
+
+  author: Author;
+
+  tagged_users: null;
+
+  image_urls: string[];
+
+  stats: PostStats;
+
+  is_liked: boolean;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total_items: number;
+  total_pages: number;
+  has_next: boolean;
+}
+
+export interface FeedData {
+  items: FeedPost[];
+  pagination: Pagination;
+}
+
+export interface FeedResponse {
+  statuscode: number;
+  success: boolean;
+  message: string;
+  data: FeedData;
+}
+
 export interface CommentRequestBody {
   message: string;
   parent_comment_id?: number;

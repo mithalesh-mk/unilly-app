@@ -4,6 +4,7 @@ import type {
   CreatePostRequest,
   CreatePostResponse,
   FeedParams,
+  FeedResponse,
   GetRepliesResponse,
   UploadPostMediaRequest,
   UploadPostMediaResponse,
@@ -91,13 +92,13 @@ export const createPost = async (data: CreatePostRequest) => {
   return response.data;
 };
 
-export const fetchFeedPosts = async (params: FeedParams) => {
+export const fetchFeedPosts = async (params: FeedParams): Promise<FeedResponse> => {
   try {
     const res = await axiosInstance.get("/posts/feed", {
       params,
     });
 
-    return res.data.data; // { items, pagination }
+    return res.data; // { items, pagination }
   } catch (error: any) {
     console.log("Fetch Feed Error:", error?.response?.data || error.message);
     throw error;
