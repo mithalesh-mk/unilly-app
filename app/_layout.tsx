@@ -1,6 +1,8 @@
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { AppThemeProvider, useTheme } from "@/utils/Theme/theme";
 
@@ -34,10 +36,14 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <AppThemeProvider>
-        <RootNavigator />
-      </AppThemeProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <AppThemeProvider>
+          <BottomSheetModalProvider>
+            <RootNavigator />
+          </BottomSheetModalProvider>
+        </AppThemeProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

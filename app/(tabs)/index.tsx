@@ -1,26 +1,22 @@
 import React from 'react';
 
 import { fetchFeedPosts } from '@/services/posts/post.service';
-import { FlashList } from '@shopify/flash-list';
 import { BodyText, ThemedScreen } from '@/utils/Theme/ThemedScreen';
 import { Ionicons } from '@expo/vector-icons';
+import { FlashList } from '@shopify/flash-list';
 import {
   ActivityIndicator,
-  Animated,
-  FlatList,
-  Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   StyleSheet,
   Text,
-  TouchableOpacity,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FeedPost } from '@/services/posts/post.types';
 import { useTheme } from '@/utils/Theme/theme';
+import PostCard from '@/components/Home/PostCard';
+import CommentPanel from '@/components/Home/CommentPanel';
+
 
 const Home = () => {
   const [loading, setLoading] = React.useState(false);
@@ -31,6 +27,13 @@ const Home = () => {
   const isFetchingRef = React.useRef(false);
   const hasNextPageRef = React.useRef(true);
   const { colors } = useTheme();
+  const [showComments, setShowComments] = React.useState(false)
+  const [selectedPost, setSelectedPost] = React.useState<FeedPost | null>(null)
+
+  const openComments = (post: FeedPost) => {
+    setSelectedPost(post)
+    setShowComments(true)
+  }
 
   const fetchPosts = React.useCallback(async ({ reset = false } = {}) => {
     if (isFetchingRef.current || (!reset && !hasNextPageRef.current)) return;
@@ -79,7 +82,7 @@ const Home = () => {
   }, [fetchPosts]);
 
   const renderPost = React.useCallback(
-    ({ item }: { item: FeedPost }) => <PostCard feedData={item} />,
+    ({ item }: { item: FeedPost }) => <PostCard onOpenComments={() => openComments(item)} feedData={item} />,
     [],
   );
 
@@ -114,10 +117,6 @@ const Home = () => {
         refreshing={refreshing}
         onRefresh={handleRefresh}
         removeClippedSubviews
-        // initialNumToRender={6}
-        // maxToRenderPerBatch={8}
-        // updateCellsBatchingPeriod={50}
-        // windowSize={7}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={
@@ -186,226 +185,20 @@ const Home = () => {
           </View>
         }
       />
+      <CommentPanel
+        visible={showComments}
+        onClose={() => setShowComments(false)}
+        comments={[]}
+        colors={{bg: colors.bg, border: colors.border, text: colors.text, card: colors.card, placeholder: colors.subText, primary: colors.primary}}
+        onSendComment={(text) => {
+            console.log(text)
+        }}
+        />
     </SafeAreaView>
   );
 };
 
-type PostCardProps = {
-  feedData: FeedPost;
-};
 
-const PostCard = React.memo(function PostCard({ feedData }: PostCardProps) {
-  const { colors } = useTheme();
-  const { width } = useWindowDimensions();
-  const carouselRef = React.useRef<FlatList<string>>(null);
-  const scrollX = React.useRef(new Animated.Value(0)).current;
-  const [activeImageIndex, setActiveImageIndex] = React.useState(0);
-  const imageUrls = feedData.image_urls ?? [];
-  const postImageWidth = Math.max(width, 1);
-  const likesCount = feedData.stats.likes_count;
-  const commentsCount = feedData.stats.comments_count;
-  const imageCount = imageUrls.length;
-  const visibleImageIndex =
-    imageCount > 0 ? Math.min(activeImageIndex, imageCount - 1) : 0;
-
-  React.useEffect(() => {
-    setActiveImageIndex(0);
-    scrollX.setValue(0);
-
-    const frame = requestAnimationFrame(() => {
-      carouselRef.current?.scrollToOffset({ offset: 0, animated: false });
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [feedData.id, postImageWidth, scrollX]);
-
-  const handleImageScrollEnd = React.useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (imageCount <= 0) return;
-
-      const nextIndex = Math.round(
-        event.nativeEvent.contentOffset.x / postImageWidth,
-      );
-
-      setActiveImageIndex(Math.min(Math.max(nextIndex, 0), imageCount - 1));
-    },
-    [imageCount, postImageWidth],
-  );
-
-  return (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor: colors.card, borderColor: colors.border },
-      ]}
-    >
-      <View style={styles.postHeader}>
-        <Image
-          source={{
-            uri: feedData?.author?.profile_pic,
-          }}
-          style={[
-            styles.avatar,
-            { backgroundColor: colors.bg, borderColor: colors.border },
-          ]}
-        />
-
-        <View style={styles.userInfo}>
-          <Text style={[styles.username, { color: colors.text }]}>
-            {feedData?.author?.username}
-          </Text>
-
-          <Text style={[styles.name, { color: colors.subText }]}>
-            {feedData?.author?.name}
-          </Text>
-        </View>
-
-        <TouchableOpacity activeOpacity={0.75} style={styles.moreButton}>
-          <Ionicons name="ellipsis-horizontal" size={20} color={colors.text} />
-        </TouchableOpacity>
-      </View>
-
-      {imageCount > 0 && (
-        <View
-          style={[
-            styles.postImageFrame,
-            { backgroundColor: colors.card, borderColor: colors.border },
-          ]}
-        >
-          <FlatList
-            key={`${feedData.id}-${postImageWidth}`}
-            ref={carouselRef}
-            data={imageUrls}
-            horizontal
-            bounces={false}
-            decelerationRate="normal"
-            disableIntervalMomentum
-            directionalLockEnabled
-            getItemLayout={(_, index) => ({
-              length: postImageWidth,
-              offset: postImageWidth * index,
-              index,
-            })}
-            onMomentumScrollEnd={handleImageScrollEnd}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false },
-            )}
-            overScrollMode="never"
-            scrollEventThrottle={16}
-            showsHorizontalScrollIndicator={false}
-            snapToAlignment="start"
-            snapToInterval={postImageWidth}
-            keyExtractor={(item, index) => `${item}-${index}`}
-            renderItem={({ item }) => (
-              <View style={{ width: postImageWidth }}>
-                <Image
-                  source={{ uri: item }}
-                  style={[styles.postImage, { width: postImageWidth }]}
-                  resizeMode="contain"
-                />
-              </View>
-            )}
-          />
-
-          {imageCount > 0 && (
-            <>
-              <View
-                style={[
-                  styles.imageCounter,
-                  { backgroundColor: colors.bg, borderColor: colors.border },
-                ]}
-              >
-                <Text style={[styles.imageCounterText, { color: colors.text }]}>
-                  {visibleImageIndex + 1}/{imageCount}
-                </Text>
-              </View>
-
-              <View style={styles.imageDots}>
-                {imageUrls.map((imageUrl, index) => (
-                  <Animated.View
-                    key={`${imageUrl}-${index}-dot`}
-                    style={[
-                      styles.imageDot,
-                      {
-                        backgroundColor:
-                          index === visibleImageIndex
-                            ? colors.primary
-                            : colors.border,
-                        transform: [
-                          {
-                            scale: scrollX.interpolate({
-                              inputRange: [
-                                (index - 1) * postImageWidth,
-                                index * postImageWidth,
-                                (index + 1) * postImageWidth,
-                              ],
-                              outputRange: [1, 1.45, 1],
-                              extrapolate: 'clamp',
-                            }),
-                          },
-                        ],
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-            </>
-          )}
-        </View>
-      )}
-
-      <View style={styles.postActions}>
-        <View style={styles.primaryActions}>
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionIconButton}>
-            <Ionicons name="heart-outline" size={25} color={colors.text} />
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionIconButton}>
-            <Ionicons
-              name="chatbubble-outline"
-              size={23}
-              color={colors.text}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity activeOpacity={0.75} style={styles.actionIconButton}>
-            <Ionicons name="paper-plane-outline" size={23} color={colors.text} />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity activeOpacity={0.75} style={styles.actionIconButton}>
-          <Ionicons name="bookmark-outline" size={24} color={colors.text} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.postContent}>
-        <Text style={[styles.likesText, { color: colors.text }]}>
-          {likesCount} {likesCount === 1 ? 'like' : 'likes'}
-        </Text>
-
-        <Text style={[styles.caption, { color: colors.text }]}>
-          <Text style={styles.captionAuthor}>{feedData?.author?.username}</Text>
-          {feedData?.title ? ` ${feedData.title}` : ''}
-        </Text>
-
-        {feedData?.body ? (
-          <Text style={[styles.body, { color: colors.text }]}>
-            {feedData.body}
-          </Text>
-        ) : null}
-
-        {commentsCount > 0 && (
-          <TouchableOpacity activeOpacity={0.75}>
-            <Text style={[styles.commentsText, { color: colors.subText }]}>
-              View all {commentsCount} comments
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
-  );
-});
 
 const styles = StyleSheet.create({
   screen: {
@@ -542,13 +335,13 @@ const styles = StyleSheet.create({
 
   postImageFrame: {
     width: '100%',
-    aspectRatio: 1,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderTopWidth: StyleSheet.hairlineWidth,
     overflow: 'hidden',
   },
 
   postImage: {
+    width: '100%',
     height: '100%',
   },
 
@@ -593,19 +386,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 10,
     paddingTop: 8,
+    paddingBottom: 4,
   },
 
   primaryActions: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 2,
+    gap: 8,
   },
 
   actionIconButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
+    gap: 4,
   },
 
   postContent: {
@@ -615,7 +408,7 @@ const styles = StyleSheet.create({
   },
 
   likesText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '800',
     marginBottom: 5,
   },
